@@ -1,3 +1,8 @@
+# Ignored
+data/
+log/
+books/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
