@@ -4,7 +4,7 @@ from src.models.blocks import ResidualBlock, NonLocalBlock, UpSampleBlock
 
 
 class Decoder(nn.Module):
-    def __init__(self, args):
+    def __init__(self, args, resize=True):
         super().__init__()
         channels = args.decoder_channels
         head = nn.Sequential(
@@ -13,10 +13,11 @@ class Decoder(nn.Module):
             NonLocalBlock(channels[0], args.num_groups),            
         )
         tail = nn.Sequential(*[            
-            nn.Sequential(
+            (nn.Sequential(
                 UpSampleBlock(in_c),
                 ResidualBlock(in_c, out_c, args.num_groups),
-            )
+             ) if resize
+             else ResidualBlock(in_c, out_c, args.num_groups))
             for in_c, out_c in 
             zip(channels, channels[1:])
         ])

@@ -2,15 +2,15 @@ import torch
 import torch.nn as nn
 from src.models.encoder import Encoder
 from src.models.decoder import Decoder
-from src.models.codebook import Codebook
+from src.models.quantizer import  VectorQuantizer2
 
 
 class VQGAN(nn.Module):
-    def __init__(self, args):
+    def __init__(self, args, resize):
         super(VQGAN, self).__init__()
-        self.encoder = Encoder(args)
-        self.decoder = Decoder(args)
-        self.codebook = Codebook(args)
+        self.encoder = Encoder(args, resize)
+        self.decoder = Decoder(args, resize)
+        self.codebook = VectorQuantizer2(args)
 
     def forward(self, imgs):
         encoded_images = self.encoder(imgs)        
