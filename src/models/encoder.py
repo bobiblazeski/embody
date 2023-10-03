@@ -3,14 +3,14 @@ import torch.nn as nn
 from src.models.blocks import ResidualBlock, NonLocalBlock, DownSampleBlock
 
 class Encoder(nn.Module):
-    def __init__(self, args, resize=True):
+    def __init__(self, args):
         super().__init__()                
         channels = [args.image_channels] + args.encoder_channels
         head = nn.Sequential(*[            
             (nn.Sequential(
                 ResidualBlock(in_c, out_c, args.num_groups),
                 DownSampleBlock(out_c),
-             ) if resize
+             ) if args.encoder_downsample
              else ResidualBlock(in_c, out_c, args.num_groups))
             for in_c, out_c in 
             zip(channels, channels[1:])

@@ -29,10 +29,10 @@ blend_transform  = Compose([
     Lambda(lambda t: AUG.max_scale(t)),
     Lambda(lambda t: AUG.center(t)),
     Lambda(lambda t: AUG.random_execution(t, 0.5, AUG.reflect)),
-    Lambda(lambda t: AUG.random_execution(t, 0.5, AUG.split_nth)),        
+    Lambda(lambda t: AUG.random_execution(t, 0.25, AUG.split_nth)),        
     Lambda(lambda t: AUG.random_shift(t)),
-    Lambda(lambda t: AUG.random_execution(t, 0.25, AUG.perlin_noise)),
-    Lambda(lambda t: AUG.random_execution(t, 0.25, AUG.fractal_noise)),            
+    Lambda(lambda t: AUG.random_execution(t, 0.1, AUG.perlin_noise)),
+    Lambda(lambda t: AUG.random_execution(t, 0.1, AUG.fractal_noise)),
 ])
 
 class BlendDataset(torch.utils.data.Dataset):
