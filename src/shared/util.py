@@ -21,7 +21,7 @@ def to_vertices(t):
         return t.permute(0, 3, 2, 1).reshape(bs, -1, 3)
     raise Exception("No of dimension must be 3 or 4 not", dims)
 
-def to_cylinder(t):
+def to_patch(t):
     dims = len(t.shape)
     if dims == 2:
         n = int(math.sqrt(t.size(0)))    

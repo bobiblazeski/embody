@@ -18,7 +18,7 @@ def sample_light_directions(n, ratio=0.9, standard=(0.0, 0.0, -1.0)):
     directions = ratio * direction_std + (1-ratio) * direction_rnd
     return F.normalize(directions, dim=-1)
 
-def sample_views(n, x=(-0.5, 0.5), y=(-0.5, 0.5), z=(2.55, 2.6)):
+def sample_views(n, x=(-0.05, 0.05), y=(-0.05, 0.05), z=(1.5, 1.6)):
     eye = torch.stack([
         torch.FloatTensor(n).uniform_(*x),
         torch.FloatTensor(n).uniform_(*y),

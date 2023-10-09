@@ -2,6 +2,16 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+class DepthwiseSeparable2d(nn.Module):
+    def __init__(self, in_ch, out_ch):
+        super().__init__()
+        self.depthwise = nn.Conv2d(in_ch, in_ch, 3, 1, 1, groups=in_ch)
+        self.pointwise = nn.Conv2d(in_ch, out_ch, 1)
+
+    def forward(self, x):
+        x = self.depthwise(x)
+        x = self.pointwise(x)
+        return x
 
 class ResidualBlock(nn.Module):
     def __init__(self, in_channels, out_channels, num_groups):

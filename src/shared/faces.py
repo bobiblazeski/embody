@@ -14,7 +14,7 @@ def create_strips(n, m):
         res.append(strip)
     return res
 
-def make_faces(n, m=None):    
+def make_faces(n, m=None, device=None):
     strips = create_strips(n, m or n)    
     return torch.tensor(triangle_strips_to_faces(strips),
-                        dtype=torch.int32)
+                        dtype=torch.int32, device=device)

@@ -12,7 +12,7 @@ import src.shared.transforms as TR
 class CloudRenderDataset(torch.utils.data.Dataset):
     
     def __init__(self, stl_root, n_samples, device, resolution=None,
-            coarse_root=None, fine_root=None,
+            coarse_root=None, fine_root=None, scale=True,
             flip=[1., 1., -1.], material=0.8, random_scale=0.1):
         self.glctx = dr.RasterizeGLContext()
         self.stl_root = stl_root
@@ -20,6 +20,7 @@ class CloudRenderDataset(torch.utils.data.Dataset):
         self.fine_root = fine_root
         self.n_samples = n_samples
         self.device = device
+        self.scale = scale
         self.resolution = resolution        
         self.material = material
         self.rs = random_scale
@@ -45,8 +46,12 @@ class CloudRenderDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         scale = torch.Tensor([uniform(1-self.rs, 1+self.rs) for _ in range(3)])
 
-        vertices, faces, _ = self.records[idx]                
-        vertices = vertices * scale
+        vertices, faces, _ = self.records[idx]
+        if self.scale:
+            vertices = vertices * scale
+        else:
+            scale = torch.ones_like(scale)
+
         vertices, faces = [f.to(self.device) for f in (vertices, faces)]
         
         res = {}
