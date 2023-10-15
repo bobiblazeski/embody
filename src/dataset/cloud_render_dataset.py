@@ -13,7 +13,7 @@ class CloudRenderDataset(torch.utils.data.Dataset):
     
     def __init__(self, stl_root, n_samples, device, resolution=None,
             coarse_root=None, fine_root=None, scale=True,
-            flip=[1., 1., -1.], material=0.8, random_scale=0.1):
+            flip=[1., 1., -1.], material=0.8, random_scale=0.05):
         self.glctx = dr.RasterizeGLContext()
         self.stl_root = stl_root
         self.coarse_root = coarse_root

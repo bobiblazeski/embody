@@ -2,61 +2,54 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+class Residual(nn.Module):
+    def __init__(self, in_channels, num_hiddens, num_residual_hiddens):
+        super(Residual, self).__init__()
+        self._block = nn.Sequential(
+            nn.ReLU(True),        
+            DepthwiseSeparable2d(in_channels, num_residual_hiddens,  kernel_size=3,
+                                 stride=1, padding=1, bias=False),
+            
+            nn.ReLU(True),
+            nn.Conv2d(in_channels=num_residual_hiddens,
+                      out_channels=num_hiddens,
+                      kernel_size=1, stride=1, bias=False)          
+        )
+    
+    def forward(self, x):
+        return x + self._block(x)
+
+
+class ResidualStack(nn.Module):
+    def __init__(self, in_channels, num_hiddens, num_residual_layers, num_residual_hiddens):
+        super(ResidualStack, self).__init__()
+        self._num_residual_layers = num_residual_layers
+        self._layers = nn.ModuleList([Residual(in_channels, num_hiddens, num_residual_hiddens)
+                             for _ in range(self._num_residual_layers)])
+
+    def forward(self, x):
+        for i in range(self._num_residual_layers):
+            x = self._layers[i](x)
+        return F.relu(x)
+
 class DepthwiseSeparable2d(nn.Module):
-    def __init__(self, in_ch, out_ch):
+    def __init__(self, in_ch, out_ch, bias=False, kernel_size=3, stride=1, padding=1):
         super().__init__()
-        self.depthwise = nn.Conv2d(in_ch, in_ch, 3, 1, 1, groups=in_ch)
-        self.pointwise = nn.Conv2d(in_ch, out_ch, 1)
+        self.depthwise = nn.Conv2d(in_ch, in_ch, kernel_size, stride, padding, groups=in_ch, bias=bias)
+        self.pointwise = nn.Conv2d(in_ch, out_ch, 1, bias=bias)
 
     def forward(self, x):
         x = self.depthwise(x)
         x = self.pointwise(x)
         return x
-
-class ResidualBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, num_groups):
-        super().__init__()  
-        self.in_channels = in_channels
-        self.out_channels = out_channels
-        self.block = nn.Sequential(
-            nn.Conv2d(in_channels, out_channels, 3, 1, 1),
-            nn.GroupNorm(num_groups=num_groups, num_channels=out_channels,
-                         eps=1e-6, affine=True),
-            nn.SiLU(),
-            nn.Conv2d(out_channels, out_channels, 3, 1, 1),
-            nn.GroupNorm(num_groups=num_groups, num_channels=out_channels,
-                         eps=1e-6, affine=True),
-            nn.SiLU(),       
-        )
-
-        if in_channels != out_channels:
-            self.channel_up = nn.Conv2d(in_channels, out_channels, 1, 1, 0)
-
-    def forward(self, x):
-        if self.in_channels != self.out_channels:
-            return self.channel_up(x) + self.block(x)
-        else:
-            return x + self.block(x)
-
-
-class UpSampleBlock(nn.Module):
-    def __init__(self, channels):
-        super(UpSampleBlock, self).__init__()
-        self.conv = nn.Conv2d(channels, channels, 3, 1, 1)
+       
+class DoubleBlock(nn.Module):
+    def __init__(self, in_channels, out_channels):
+        super().__init__()        
+        self.conv = DepthwiseSeparable2d(in_channels, out_channels)
 
     def forward(self, x):
         x = F.interpolate(x, scale_factor=2.0)
-        return self.conv(x)
-
-
-class DownSampleBlock(nn.Module):
-    def __init__(self, channels):
-        super(DownSampleBlock, self).__init__()
-        self.conv = nn.Conv2d(channels, channels, 3, 2, 0)
-
-    def forward(self, x):
-        pad = (0, 1, 0, 1)
-        x = F.pad(x, pad, mode="constant", value=0)
         return self.conv(x)
 
 

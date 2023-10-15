@@ -170,12 +170,8 @@ class Encoder(nn.Module):
                                       stride=1)
 
     def forward(self, inputs):
-        x = self._conv_1(inputs)
-        x = F.relu(x)
-        
-        x = self._conv_2(x)
-        x = F.relu(x)
-        
+        x = F.relu(self._conv_1(inputs))        
+        x = F.relu(self._conv_2(x))                
         x = self._conv_3(x)
         x = self._residual_stack(x)
         return self._pre_vq_conv(x)

@@ -1,30 +1,28 @@
-from collections import OrderedDict
 import torch.nn as nn
-from src.models.blocks import ResidualBlock, NonLocalBlock, DownSampleBlock
+from src.models.blocks import (  
+  DepthwiseSeparable2d,
+  ResidualStack,
+)
 
 class Encoder(nn.Module):
-    def __init__(self, args):
-        super().__init__()                
-        channels = [args.image_channels] + args.encoder_channels
-        head = nn.Sequential(*[            
-            (nn.Sequential(
-                ResidualBlock(in_c, out_c, args.num_groups),
-                DownSampleBlock(out_c),
-             ) if args.encoder_downsample
-             else ResidualBlock(in_c, out_c, args.num_groups))
-            for in_c, out_c in 
-            zip(channels, channels[1:])
-        ])
-        tail = nn.Sequential(            
-            NonLocalBlock(channels[-1], args.num_groups),
-            ResidualBlock(channels[-1], channels[-1], args.num_groups), 
-            nn.Conv2d(channels[-1], args.latent_dim, 3, 1, 1),
-            nn.Conv2d(args.latent_dim, args.latent_dim, 1),        
-        )
-        self.model = nn.Sequential(OrderedDict({
-            'head': head,
-            'tail': tail,
-        }))
+    def __init__(self, in_channels, num_hiddens, num_residual_layers, num_residual_hiddens, embedding_dim):
+        super().__init__()
+        self.net = nn.Sequential(
+            DepthwiseSeparable2d(in_channels, num_hiddens//2,  kernel_size=4,
+                                 stride=2, padding=1),
+            nn.ReLU(True),
+            DepthwiseSeparable2d(num_hiddens//2, num_hiddens,  kernel_size=4,
+                                 stride=2, padding=1),
+            nn.ReLU(True),
+            DepthwiseSeparable2d(num_hiddens, num_hiddens,  kernel_size=3,
+                                 stride=1, padding=1),
+            ResidualStack(in_channels=num_hiddens,
+                          num_hiddens=num_hiddens,
+                          num_residual_layers=num_residual_layers,
+                          num_residual_hiddens=num_residual_hiddens),
+            DepthwiseSeparable2d(num_hiddens, embedding_dim,  kernel_size=1,
+                                 stride=1, padding=0),            
+        )        
 
-    def forward(self, x):
-        return self.model(x)
+    def forward(self, x):        
+        return self.net(x)
