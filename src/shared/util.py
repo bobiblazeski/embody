@@ -63,20 +63,20 @@ def export_offsets(offsets, location, prefix):
         joined = join(offsets[:-i] if i else offsets)
         export_stl(joined[0], location + prefix + str(joined.size(-1)))
 
-def split(t, sizes=None):
+def split(t, sizes=None, mode='nearest'):
     res, size = [], t.size(-1)
     if sizes is None:
         sizes = [2**i for i in range(int(math.log2(size))+1)]
     for sz in sizes:
         layer =  F.adaptive_avg_pool2d(t, sz)        
         res.append(layer)
-        t = t - F.interpolate(layer, size, mode='nearest')
+        t = t - F.interpolate(layer, size, mode=mode)
     return res  
 
-def join(layers):
+def join(layers, mode='nearest'):
     res, size = 0, layers[-1].size(-1)
     for l in layers:
-        res = res + F.interpolate(l, size, mode='nearest')
+        res = res + F.interpolate(l, size, mode=mode)
     return res
 
 def noise(t, ratio=0.05):
