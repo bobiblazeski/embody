@@ -24,9 +24,11 @@ class Enricher(nn.Module):
         return normals * distances    
 
     def forward(self, x, faces=None):
-        res = [U.add_fourier(x, self.terms)]     
-        if self.normals:
+        res = [x]
+        if self.terms:
+            res.append(U.add_fourier(x, self.terms, input=False))
+        if self.normals:            
             res.append(self.adjusted_normals(x, faces))
-        if self.distances:
+        if self.distances:            
             res.append(self.neighbor_distancer(x))        
-        return torch.cat(res, dim=1) if len(res) == 1 else res[0]
+        return torch.cat(res, dim=1) if len(res) > 1 else res[0]
