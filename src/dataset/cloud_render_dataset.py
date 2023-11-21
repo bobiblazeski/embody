@@ -30,44 +30,44 @@ class CloudRenderDataset(torch.utils.data.Dataset):
             if f.endswith('.stl')
         ]
         if coarse_root:
-            self.coarse = torch.cat([
-                torch.load(coarse_root+f)
-                for f in sorted(os.listdir(coarse_root))
-            ], dim=0).cpu()
+            self.coarse = self.load_patches(coarse_root)            
         if fine_root:
-            self.fine = torch.cat([
-                torch.load(fine_root+f)
-                for f in sorted(os.listdir(fine_root))
-            ], dim=0).cpu()
-        
+            self.fine = self.load_patches(fine_root)
+
+    def load_patches(self, root):
+        list = [torch.load(root+f) for f in sorted(os.listdir(root))]        
+        if list[0].dim() == 3:            
+            return torch.stack(list).cpu()
+        return torch.cat(list, dim=0).cpu()
+
     def __len__(self):        
         return len(self.records)    
     
     def __getitem__(self, idx):
         scale = torch.Tensor([uniform(1-self.rs, 1+self.rs) for _ in range(3)])
-
         vertices, faces, _ = self.records[idx]
         if self.scale:
             vertices = vertices * scale
         else:
             scale = torch.ones_like(scale)
 
-        vertices, faces = [f.to(self.device) for f in (vertices, faces)]
-        
         res = {}
-        if self.resolution:
-            material = self.material + torch.zeros_like(vertices)
-            samples = PH.sample_all(1, self.device)
-            img = PH.render_diffuse(self.glctx, vertices, faces, material, 
-                              resolution=self.resolution, samples=samples)
-            img = TR.channel_first(img)                          
-            res['img'] = img[0].cpu()
-            res['colors'] = samples[0][0].cpu()
-            res['directions'] = samples[1][0].cpu()
-            res['views'] = samples[2][0].cpu()        
-        if self.n_samples:
-            cloud, _  = sample_points(vertices, faces, self.n_samples)
-            res['cloud'] = cloud[0].cpu()
+        if self.resolution or self.n_samples:
+            vertices, faces = [f.to(self.device) for f in (vertices, faces)]            
+
+            if self.resolution:
+                material = self.material + torch.zeros_like(vertices)
+                samples = PH.sample_all(1, self.device)
+                img = PH.render_diffuse(self.glctx, vertices, faces, material, 
+                                  resolution=self.resolution, samples=samples)
+                img = TR.channel_first(img)                          
+                res['img'] = img[0].cpu()
+                res['colors'] = samples[0][0].cpu()
+                res['directions'] = samples[1][0].cpu()
+                res['views'] = samples[2][0].cpu()        
+            if self.n_samples:
+                cloud, _  = sample_points(vertices, faces, self.n_samples)
+                res['cloud'] = cloud[0].cpu()
         if self.coarse_root:
             res['coarse'] =  self.coarse[idx] * scale[:, None, None]
         if self.fine_root:

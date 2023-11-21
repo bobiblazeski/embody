@@ -6,7 +6,7 @@ import torch.nn.functional as F
 from numpy import random, mgrid, dstack
 from scipy.spatial import cKDTree
 
-from noise.noise_util import strength
+from src.noise.noise_util import strength
 
 def worley_noise(width, height, density):
     points = [[random.randint(0, height), random.randint(0, width)] for _ in range(density)]  # Generates Points(y, x)   

@@ -26,9 +26,9 @@ class Residual(nn.Module):
         return self.proj(x) + self.block(x) 
 
 class DepthwiseSeparable2d(nn.Module):
-    def __init__(self, in_ch, out_ch, bias=False, kernel_size=3, stride=1, padding=1):
+    def __init__(self, in_ch, out_ch, bias=False, kernel_size=3, stride=1, padding=1, padding_mode='replicate'):
         super().__init__()
-        self.depthwise = nn.Conv2d(in_ch, in_ch, kernel_size, stride, padding, groups=in_ch, bias=bias)
+        self.depthwise = nn.Conv2d(in_ch, in_ch, kernel_size, stride, padding, padding_mode=padding_mode, groups=in_ch, bias=bias)
         self.pointwise = nn.Conv2d(in_ch, out_ch, 1, bias=bias)
 
     def forward(self, x):

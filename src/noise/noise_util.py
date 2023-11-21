@@ -25,7 +25,10 @@ def rescale(t, size, mode='bilinear'):
 
 def normalize_batch(x):
     x = x - x.mean(dim=(1, 2, 3), keepdim=True)
-    return x / x.std(dim=(1, 2, 3), keepdim=True)     
+    return x / x.std(dim=(1, 2, 3), keepdim=True)
+
+def normalize_cloud(cloud,  mean, std):
+    return (cloud - mean.squeeze(dim=-1)) / std.squeeze(dim=-1)   
 
 def fractal_noise(x, mode='bicubic', exp=3):
     b, c, _, size = x.shape

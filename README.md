@@ -1,4 +1,13 @@
 # embody
+Compare sample points with upsampled generated vertices
+one sided from the sample side
+
+Diffusers unet block, norm-> activation -> convolution
+
+noising
+- blur noise
+- add perlin/worley noise to normals
+- <del> add randn noise in high dimension<del> Too much noise
 
 
 Add transforms for dataset
