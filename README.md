@@ -1,12 +1,22 @@
 # embody
-Compare sample points with upsampled generated vertices
-one sided from the sample side
 
-Diffusers unet block, norm-> activation -> convolution
+-mosaic augmentation
+-uvsa of max errors
+- blockdropout for convolution
+- PicoDet
+- yolo v8
 
-noising
-- blur noise
-- add perlin/worley noise to normals
+  
+ ????
+ 
+<del>Compare sample points with upsampled generated vertices<del>
+<del>one sided from the sample side<del>
+
+<del>Diffusers unet block, norm-> activation -> convolution<del>
+
+<del>noising<del>
+- <del>blur noise<del>
+- <del>add perlin/worley noise to normals<del>
 - <del> add randn noise in high dimension<del> Too much noise
 
 
@@ -19,7 +29,7 @@ Add transforms for dataset
  6 <del> Reflection via padding <del> 
  7 <del> Random blend with other sample<del>
   
- ????
+
 
 <del>Add tensorboard logging<del>
 <del>Add checkpoints<del>
