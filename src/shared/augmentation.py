@@ -22,7 +22,7 @@ def max_scale(t):
 
 def random_nth(t, n):
     su, sv = torch.randint(n, (2,)).tolist()
-    return t[:, :, su::n, sv::n]
+    return t[..., su::n, sv::n]
 
 def resize_nearest(t, size):
     return F.interpolate(t, size)
@@ -84,6 +84,6 @@ def random_split(t):
     uvexp = F.interpolate(uexp, (mn+mn-1, mn+mn-1), mode='nearest')  
     uvexp[:, :, :, 1::2] = vm
     
-    uvexp = F.interpolate(t, 2*mn, mode='bilinear')    
+    uvexp = F.interpolate(uvexp, 2*mn, mode='bilinear')    
     return uvexp
 

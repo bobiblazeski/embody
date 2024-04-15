@@ -9,7 +9,7 @@ class Sharpen(nn.Module):
         super().__init__()        
         kernel = torch.tensor(kernels[mask[0]][mask[1]])       
         self.padd = padd
-        arr = [('padd', nn.ReplicationPad2d(1))] if padd else []
+        arr = [('padd', nn.ReplicationPad2d(kernel.size(-1) // 2))] if padd else []
         arr.append(('conv', nn.Conv2d(channels, channels, kernel.size(-1), 
             stride=1, padding=0, bias=False, groups=channels)),)
         self.seq = nn.Sequential(OrderedDict(arr))
@@ -24,7 +24,27 @@ class Sharpen(nn.Module):
             f.data.copy_(kernel)
 
 sharpen = {
-    '3x3': [
+    '3x3_2': [
+        [ 0.00,  0.25, 0.00],
+        [ 0.25, -2.00, 0.25],
+        [ 0.00,  0.25, 0.00],
+    ],
+    '3x3_3': [
+        [ 0.0,  0.5, 0.0],
+        [ 0.5, -3.0, 0.5],
+        [ 0.0,  0.5, 0.0],
+    ],
+    '3x3_5': [
+        [ 0.,  1., 0.],
+        [ 1., -5., 1.],
+        [ 0.,  1., 0.],
+    ],
+    '3x3_7': [
+        [ 0.5,  1.0, 0.5],
+        [ 1.0, -7.0, 1.0],
+        [ 0.5,  1.0, 0.5],
+    ],
+    '3x3_9': [
         [ 1.,  1., 1.],
         [ 1., -9., 1.],
         [ 1.,  1., 1.],

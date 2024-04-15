@@ -11,7 +11,12 @@ def scale(t, size, mode):
         return F.interpolate(t[None], size=size, mode=mode)[0]
     return F.interpolate(t, size=size, mode=mode)
 
-
+def gram_matrix(t):
+    a, b, c, d = t.size()    
+    features = t.view(a * b, c * d)
+    G = torch.mm(features, features.t())
+    return G.div(a * b * c * d)
+    
 def to_vertices(t):
     dims = len(t.shape)
     if dims == 3:
